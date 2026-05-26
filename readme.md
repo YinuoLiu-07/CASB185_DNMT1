@@ -9,12 +9,63 @@ Path to the metadata for the samples:
 /u/project/gxxiao/annafras/WGCNA/SEAAD_DLPFC/metadata_snRNAseq_SEA-AD_DLPFC_with_mapping.txt
 
 eCLIP DNMT1 interaction region:
-Local on Yinuo's computer (temporarily)
+Local on Yinuo's computer (temporarily) => uploaded to github
 
 How to make a gtf? Adaptable code at:
 /u/home/y/yinuoliu/project-gxxiao/Parkinsons_pro/submitDownload/step13/make_gtf.R
 
-# Step 2: Make gtf file (Prep for later steps)
+# Step 2: Make gtf file (Prep for later steps) 
+# Miniconda3 and HOMER in this step was installed for individual user on hoffman2, if cluster is not available, might need to install these programs locally for the analysis
+
+# Step 2.1: Install Miniconda 
+
+-First install miniconda: https://www.anaconda.com/docs/getting-started/miniconda/install/linux-install#curl
+
+curl -O https://repo.anaconda.com/miniconda/Miniconda3-py311_23.11.0-2-Linux-x86_64.sh
+bash ./Miniconda3-py311_23.11.0-2-Linux-x86_64.sh
+source ~/.bashrc
+
+verify installation:
+conda list
+
+# Step 2.2: Add bioconda channels (do not change command order)
+
+conda config --add channels bioconda
+conda config --add channels conda-forge
+conda config --set channel_priority strict
+
+# Step 2.3: Setup environment and download packages needed for HOMER installation
+## Note: 1. A new environment is created to install the packages because the base conda version was installed to be compatible with the cluster, not necessarily compatible with the packages and program that needs to be installed later. 2. --solver=libmamba is a command that forces the environment to use less RAM when solving the environment before installing the packages. This is useful when operating on a "public" cluster with limited resources like hoffman2.
+
+conda create -n homer_env wget samtools r-essentials bioconductor-deseq2 bioconductor-edger --solver=libmamba
+
+# Step 2.4: Activate environment; Install and Setup HOMER
+
+Activate environment:
+conda activate homer_env
+
+Follow steps on: http://homer.ucsd.edu/homer/introduction/install.html
+
+Download the "configureHomer.pl" script and place it in a directory where you would like homer to be installed. Use WinSCP (windows users), to help upload the script from a local folder to the cluster space.
+
+Install:
+perl /path-to-homer/configureHomer.pl -install
+
+Add the homer/bin directory to your executable path.  
+PATH=$PATH:/Users/chucknorris/homer/bin/
+
+Reset your terminal so that the changes to the PATH variable take effect
+source ~/.bash_profile
+
+Install HOMER packages/data/reference genome:
+
+perl /path-to-homer/configureHomer.pl -install hg38
+
+# Step 2.5 Use Homer to find the CCG motif
+Detailed instructions can be found here: http://homer.ucsd.edu/homer/ngs/peakMotifs.html
+
+This readme will only include what I did for reproducibility.
+
 We need the gtf file to identify the gene regions for the coordinates stored in the bed file identified as DNMT1 interation sites for which we look into the expression matrix and then do comparison.
 
 Motif Analysis:
